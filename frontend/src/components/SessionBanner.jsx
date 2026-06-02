@@ -8,7 +8,8 @@ export default function SessionBanner({ session }) {
 
   if (!session) return null;
 
-  const shareUrl = `${window.location.origin}/${session.token}`;
+  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const shareUrl = `${baseUrl}/${session.token}`;
 
   async function handleCopy() {
     try {
