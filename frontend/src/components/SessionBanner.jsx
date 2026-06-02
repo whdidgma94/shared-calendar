@@ -1,57 +1,62 @@
 import { useState } from 'react';
 
-/**
- * 캘린더 상단 배너: 세션 제목, 만료일, 공유 URL 복사 버튼
- */
 export default function SessionBanner({ session }) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied]           = useState(false);
+  const [widgetCopied, setWidgetCopied] = useState(false);
+  const [showWidget, setShowWidget]   = useState(false);
 
   if (!session) return null;
 
-  const baseUrl = import.meta.env.VITE_API_URL || window.location.origin;
+  const baseUrl  = import.meta.env.VITE_API_URL || window.location.origin;
   const shareUrl = `${baseUrl}/${session.token}`;
+  const embedUrl = `${baseUrl}/embed/${session.token}`;
+  const iframeCode = `<iframe src="${embedUrl}" width="100%" height="500" frameborder="0" style="border:none;border-radius:8px;"></iframe>`;
 
-  async function handleCopy() {
+  async function copyText(text, setCopiedFn) {
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(text);
     } catch {
-      // clipboard API 실패 시 fallback
       const el = document.createElement('textarea');
-      el.value = shareUrl;
+      el.value = text;
       document.body.appendChild(el);
       el.select();
       document.execCommand('copy');
       document.body.removeChild(el);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
     }
+    setCopiedFn(true);
+    setTimeout(() => setCopiedFn(false), 2000);
   }
 
-  const expiresLabel = session.expiresAt
-    ? new Date(session.expiresAt).toLocaleDateString('ko-KR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    : null;
-
   return (
-    <div style={styles.banner}>
-      <div style={styles.left}>
+    <>
+      <div style={styles.banner}>
         <h1 style={styles.title}>{session.title}</h1>
-        {expiresLabel && (
-          <span style={styles.expires}>만료: {expiresLabel}</span>
-        )}
+
+        <div style={styles.actions}>
+          <span style={styles.urlText}>{shareUrl}</span>
+          <button onClick={() => copyText(shareUrl, setCopied)} style={styles.btn}>
+            {copied ? '복사됨!' : '공유 URL 복사'}
+          </button>
+          <button onClick={() => setShowWidget((v) => !v)} style={styles.btnOutline}>
+            위젯 코드
+          </button>
+        </div>
       </div>
-      <div style={styles.right}>
-        <span style={styles.urlText}>{shareUrl}</span>
-        <button onClick={handleCopy} style={styles.copyBtn}>
-          {copied ? '복사됨!' : '공유 URL 복사'}
-        </button>
-      </div>
-    </div>
+
+      {showWidget && (
+        <div style={styles.widgetBar}>
+          <span style={styles.widgetLabel}>iframe 임베드 코드</span>
+          <code style={styles.code}>{iframeCode}</code>
+          <button onClick={() => copyText(iframeCode, setWidgetCopied)} style={styles.btnSmall}>
+            {widgetCopied ? '복사됨!' : '코드 복사'}
+          </button>
+          <a href={embedUrl} target="_blank" rel="noreferrer" style={styles.previewLink}>
+            미리보기 ↗
+          </a>
+          <button onClick={() => setShowWidget(false)} style={styles.closeBtn}>✕</button>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -66,22 +71,12 @@ const styles = {
     flexWrap: 'wrap',
     gap: '8px',
   },
-  left: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '12px',
-    flexWrap: 'wrap',
-  },
   title: {
     margin: 0,
     fontSize: '1.2rem',
     fontWeight: 700,
   },
-  expires: {
-    fontSize: '0.8rem',
-    opacity: 0.75,
-  },
-  right: {
+  actions: {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
@@ -89,11 +84,11 @@ const styles = {
   },
   urlText: {
     fontSize: '0.8rem',
-    opacity: 0.8,
+    opacity: 0.75,
     wordBreak: 'break-all',
-    maxWidth: '280px',
+    maxWidth: '240px',
   },
-  copyBtn: {
+  btn: {
     padding: '6px 14px',
     background: '#3788d8',
     color: '#fff',
@@ -102,5 +97,62 @@ const styles = {
     cursor: 'pointer',
     fontSize: '0.85rem',
     whiteSpace: 'nowrap',
+  },
+  btnOutline: {
+    padding: '6px 14px',
+    background: 'transparent',
+    color: '#fff',
+    border: '1px solid rgba(255,255,255,0.6)',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '0.85rem',
+    whiteSpace: 'nowrap',
+  },
+  widgetBar: {
+    display: 'flex',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: '10px',
+    padding: '10px 20px',
+    background: '#162d4a',
+    color: '#fff',
+    fontSize: '0.82rem',
+  },
+  widgetLabel: {
+    opacity: 0.75,
+    whiteSpace: 'nowrap',
+  },
+  code: {
+    flex: 1,
+    background: 'rgba(255,255,255,0.08)',
+    padding: '6px 10px',
+    borderRadius: '4px',
+    fontSize: '0.78rem',
+    wordBreak: 'break-all',
+    fontFamily: 'monospace',
+  },
+  btnSmall: {
+    padding: '5px 12px',
+    background: '#3788d8',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    fontSize: '0.82rem',
+    whiteSpace: 'nowrap',
+  },
+  previewLink: {
+    color: '#7ec8f5',
+    fontSize: '0.82rem',
+    whiteSpace: 'nowrap',
+    textDecoration: 'none',
+  },
+  closeBtn: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(255,255,255,0.6)',
+    cursor: 'pointer',
+    fontSize: '1rem',
+    padding: '2px 6px',
   },
 };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 /**
  * 표시 이름 입력 모달
@@ -7,6 +7,7 @@ import { useState } from 'react';
 export default function NameModal({ onConfirm }) {
   const [name, setName] = useState('');
   const [error, setError] = useState('');
+  const composingRef = useRef(false);
 
   function handleSubmit(e) {
     e.preventDefault();
@@ -31,10 +32,9 @@ export default function NameModal({ onConfirm }) {
             type="text"
             placeholder="표시 이름 (예: 홍길동)"
             value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-              setError('');
-            }}
+            onChange={(e) => { if (!composingRef.current) { setName(e.target.value); setError(''); } }}
+            onCompositionStart={() => { composingRef.current = true; }}
+            onCompositionEnd={(e) => { composingRef.current = false; setName(e.target.value); setError(''); }}
             style={styles.input}
             autoFocus
             maxLength={50}

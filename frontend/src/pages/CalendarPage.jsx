@@ -36,11 +36,6 @@ export default function CalendarPage() {
   useEffect(() => {
     getSession(token)
       .then((s) => {
-        // 만료 확인
-        if (s.expiresAt && new Date(s.expiresAt) < new Date()) {
-          navigate('/error?reason=expired');
-          return;
-        }
         setSession(s);
       })
       .catch((err) => {

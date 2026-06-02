@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 /**
  * 이벤트 생성/수정/삭제 모달
@@ -35,6 +35,7 @@ export default function EventModal({
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const composingRef = useRef(false);
 
   // allDay 토글 시 시간 부분 초기화
   useEffect(() => {
@@ -111,7 +112,9 @@ export default function EventModal({
           <input
             type="text"
             value={title}
-            onChange={(e) => { setTitle(e.target.value); setError(''); }}
+            onChange={(e) => { if (!composingRef.current) { setTitle(e.target.value); setError(''); } }}
+            onCompositionStart={() => { composingRef.current = true; }}
+            onCompositionEnd={(e) => { composingRef.current = false; setTitle(e.target.value); setError(''); }}
             style={styles.input}
             placeholder="일정 제목"
             maxLength={200}
@@ -155,7 +158,9 @@ export default function EventModal({
           <input
             type="text"
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => { if (!composingRef.current) setLocation(e.target.value); }}
+            onCompositionStart={() => { composingRef.current = true; }}
+            onCompositionEnd={(e) => { composingRef.current = false; setLocation(e.target.value); }}
             style={styles.input}
             placeholder="장소 (선택)"
             maxLength={200}
@@ -164,7 +169,9 @@ export default function EventModal({
           <label style={styles.label}>설명</label>
           <textarea
             value={description}
-            onChange={(e) => setDescription(e.target.value)}
+            onChange={(e) => { if (!composingRef.current) setDescription(e.target.value); }}
+            onCompositionStart={() => { composingRef.current = true; }}
+            onCompositionEnd={(e) => { composingRef.current = false; setDescription(e.target.value); }}
             style={{ ...styles.input, height: '72px', resize: 'vertical' }}
             placeholder="메모 (선택)"
             maxLength={2000}

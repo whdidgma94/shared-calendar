@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="28dp"
+    android:gravity="center_vertical"
+    android:background="#FFFFFF">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="공유 캘린더 위젯"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="#1e3a5f"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="공유받은 캘린더 URL 또는 토큰을 입력하세요.\n홈 화면에 다가오는 일정을 표시합니다."
+        android:textSize="14sp"
+        android:textColor="#666666"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginBottom="28dp"/>
+
+    <EditText
+        android:id="@+id/widget_configure_input"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="https://shared-calendar-5nyi.onrender.com/abc123..."
+        android:inputType="textUri"
+        android:imeOptions="actionDone"
+        android:padding="12dp"
+        android:textSize="14sp"
+        android:layout_marginBottom="6dp"/>
+
+    <TextView
+        android:id="@+id/widget_configure_error"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textColor="#e74c3c"
+        android:textSize="13sp"
+        android:visibility="gone"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/widget_configure_add_btn"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:text="위젯 추가"
+        android:textColor="#FFFFFF"
+        android:textSize="16sp"
+        android:backgroundTint="#1e3a5f"/>
+
+</LinearLayout>

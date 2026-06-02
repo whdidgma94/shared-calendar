@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="14dp">
+
+    <!-- 헤더 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:id="@+id/widget_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="공유 캘린더"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#1e3a5f"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <Button
+            android:id="@+id/widget_refresh_btn"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:text="↻"
+            android:textSize="16sp"
+            android:textColor="#666666"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:padding="0dp"/>
+    </LinearLayout>
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E8EEF4"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- 이벤트 1 -->
+    <TextView
+        android:id="@+id/event_text_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="불러오는 중..."
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:drawablePadding="6dp"/>
+
+    <!-- 이벤트 2 -->
+    <TextView
+        android:id="@+id/event_text_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <!-- 이벤트 3 -->
+    <TextView
+        android:id="@+id/event_text_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#333333"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <!-- 여백 채우기 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <!-- 앱 열기 버튼 -->
+    <Button
+        android:id="@+id/widget_open_btn"
+        android:layout_width="match_parent"
+        android:layout_height="34dp"
+        android:text="캘린더 열기"
+        android:textSize="12sp"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#1e3a5f"
+        android:padding="0dp"/>
+
+</LinearLayout>
