@@ -1,0 +1,66 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ────────────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: shared_calendar_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-caluser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      POSTGRES_DB: ${DB_NAME:-shared_calendar}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # 초기 스키마 자동 적용
+      - ./backend/src/db/schema.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-caluser} -d ${DB_NAME:-shared_calendar}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend (Node/Express) ────────────────────────────────────────
+  backend:
+    build:
+      context: ..
+      dockerfile: docs/Dockerfile.backend
+    container_name: shared_calendar_backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://${DB_USER:-caluser}:${DB_PASSWORD}@db:5432/${DB_NAME:-shared_calendar}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost}
+      # NOTE: H-1 해결 전까지 프로덕션 DB TLS 인증서 검증이 비활성화됩니다.
+      # pool.js의 ssl.rejectUnauthorized 를 true로 수정하고
+      # DB_SSL_CA 경로를 지정한 뒤 이 주석을 제거하세요.
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # ── Frontend (React + nginx) ───────────────────────────────────────
+  frontend:
+    build:
+      context: ..
+      dockerfile: docs/Dockerfile.frontend
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000}
+    container_name: shared_calendar_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  pg_data:

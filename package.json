@@ -1,0 +1,14 @@
+{
+  "name": "shared-calendar",
+  "version": "1.0.0",
+  "description": "세션 링크 공유 기반 캘린더 (로그인 불필요)",
+  "scripts": {
+    "build": "npm install --prefix frontend && npm run build --prefix frontend",
+    "start": "node backend/app.js",
+    "dev:backend": "cd backend && npm install && node app.js",
+    "dev:frontend": "cd frontend && npm install && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

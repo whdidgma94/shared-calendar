@@ -1,0 +1,86 @@
+{
+  "session_id": "20260602-shared-calendar",
+  "stack": {
+    "backend": "node-express",
+    "frontend": "react",
+    "db": "postgresql"
+  },
+  "models": [
+    {
+      "name": "Session",
+      "fields": [
+        { "name": "id",           "type": "uuid",      "pk": true },
+        { "name": "token",        "type": "string",    "required": true, "unique": true },
+        { "name": "title",        "type": "string",    "required": true },
+        { "name": "lastActiveAt", "type": "datetime",  "required": true },
+        { "name": "expiresAt",    "type": "datetime",  "required": true },
+        { "name": "createdAt",    "type": "datetime",  "required": true }
+      ]
+    },
+    {
+      "name": "Event",
+      "fields": [
+        { "name": "id",          "type": "uuid",     "pk": true },
+        { "name": "sessionId",   "type": "uuid",     "required": true, "fk": "Session.id" },
+        { "name": "title",       "type": "string",   "required": true },
+        { "name": "startAt",     "type": "datetime", "required": true },
+        { "name": "endAt",       "type": "datetime", "required": true },
+        { "name": "allDay",      "type": "boolean",  "default": false },
+        { "name": "description", "type": "string",   "required": false },
+        { "name": "location",    "type": "string",   "required": false },
+        { "name": "color",       "type": "string",   "default": "#3788d8" },
+        { "name": "authorName",  "type": "string",   "required": false },
+        { "name": "createdAt",   "type": "datetime", "required": true },
+        { "name": "updatedAt",   "type": "datetime", "required": true }
+      ]
+    }
+  ],
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/sessions",
+      "body": "SessionCreate",
+      "returns": "Session",
+      "description": "세션 생성. title 입력 시 token 발급, expiresAt = now + 90일."
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{token}",
+      "returns": "Session",
+      "description": "세션 메타 조회. 만료 검사 후 lastActiveAt 갱신. 만료 시 410, 미존재 시 404."
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{token}/events",
+      "query": { "from": "datetime?", "to": "datetime?" },
+      "returns": "Event[]",
+      "description": "이벤트 목록 조회. from/to 범위 필터(ISO8601, 선택). 월간/주간 뷰 및 30초 폴링 공용 엔드포인트."
+    },
+    {
+      "method": "POST",
+      "path": "/api/sessions/{token}/events",
+      "body": "EventCreate",
+      "returns": "Event",
+      "description": "이벤트 생성. 성공 시 세션 lastActiveAt 갱신."
+    },
+    {
+      "method": "GET",
+      "path": "/api/sessions/{token}/events/{eventId}",
+      "returns": "Event",
+      "description": "단일 이벤트 조회."
+    },
+    {
+      "method": "PUT",
+      "path": "/api/sessions/{token}/events/{eventId}",
+      "body": "EventUpdate",
+      "returns": "Event",
+      "description": "이벤트 수정. 성공 시 세션 lastActiveAt 및 이벤트 updatedAt 갱신."
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/sessions/{token}/events/{eventId}",
+      "returns": "void",
+      "description": "이벤트 삭제. 성공 시 세션 lastActiveAt 갱신. 204 반환."
+    }
+  ]
+}

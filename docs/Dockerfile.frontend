@@ -1,0 +1,48 @@
+# Dockerfile.frontend — React/Vite 빌드 + nginx 서빙 (멀티스테이지)
+# ─────────────────────────────────────────────────────────────────────
+# Stage 1: 빌드
+FROM node:20-alpine AS builder
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+
+# 프로덕션 API URL을 빌드 시 주입 (docker-compose에서 ARG로 전달)
+ARG VITE_API_BASE_URL=http://backend:3000
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
+RUN npm run build
+
+# Stage 2: nginx 서빙
+FROM nginx:alpine AS runner
+
+# 기본 nginx 설정 교체 (SPA 히스토리 모드 지원)
+COPY --from=builder /app/dist /usr/share/nginx/html
+COPY <<'EOF' /etc/nginx/conf.d/default.conf
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # SPA fallback
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # 정적 자산 장기 캐시
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # 보안 헤더
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "no-referrer" always;
+}
+EOF
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
