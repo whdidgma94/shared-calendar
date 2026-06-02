@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: shared-calendar
+    env: node
+    plan: free
+    buildCommand: npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend
+    startCommand: node backend/app.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/app.db
+      - key: SESSION_EXPIRES_DAYS
+        value: "90"
+    disk:
+      name: shared-calendar-data
+      mountPath: /data
+      sizeGB: 1
