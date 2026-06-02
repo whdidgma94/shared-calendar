@@ -1,7 +1,6 @@
 'use strict';
 
-const { v4: uuidv4 } = require('uuid');
-const db = require('../db/db');
+const pool = require('../db/pool');
 
 function toSession(row) {
   if (!row) return null;
@@ -16,26 +15,29 @@ function toSession(row) {
 }
 
 async function createSession({ token, title, expiresAt }) {
-  const id = uuidv4();
-  const now = new Date().toISOString();
-  const expiresAtStr = expiresAt instanceof Date ? expiresAt.toISOString() : expiresAt;
-
-  db.prepare(`
-    INSERT INTO sessions (id, token, title, last_active_at, expires_at, created_at)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `).run(id, token, title, now, expiresAtStr, now);
-
-  return toSession(db.prepare('SELECT * FROM sessions WHERE id = ?').get(id));
+  const { rows } = await pool.query(
+    `INSERT INTO sessions (token, title, expires_at)
+     VALUES ($1, $2, $3)
+     RETURNING *`,
+    [token, title, expiresAt]
+  );
+  return toSession(rows[0]);
 }
 
 async function findByToken(token) {
-  return toSession(db.prepare('SELECT * FROM sessions WHERE token = ?').get(token) || null);
+  const { rows } = await pool.query(
+    'SELECT * FROM sessions WHERE token = $1',
+    [token]
+  );
+  return toSession(rows[0] || null);
 }
 
 async function touchSession(sessionId) {
-  const now = new Date().toISOString();
-  db.prepare('UPDATE sessions SET last_active_at = ? WHERE id = ?').run(now, sessionId);
-  return toSession(db.prepare('SELECT * FROM sessions WHERE id = ?').get(sessionId));
+  const { rows } = await pool.query(
+    `UPDATE sessions SET last_active_at = NOW() WHERE id = $1 RETURNING *`,
+    [sessionId]
+  );
+  return toSession(rows[0]);
 }
 
 module.exports = { createSession, findByToken, touchSession };

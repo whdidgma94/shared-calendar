@@ -9,11 +9,7 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      - key: DB_PATH
-        value: /data/app.db
+      - key: DATABASE_URL
+        sync: false
       - key: SESSION_EXPIRES_DAYS
         value: "90"
-    disk:
-      name: shared-calendar-data
-      mountPath: /data
-      sizeGB: 1
